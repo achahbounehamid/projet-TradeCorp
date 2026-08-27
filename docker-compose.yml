@@ -1,0 +1,35 @@
+services:
+  # ----------------- Spark / JupyterLab -----------------
+  spark:
+    image: jupyter/pyspark-notebook
+    container_name: tradecorp_training_spark
+    ports:
+      - "8888:8888"   
+
+  # ----------------- Postgres -----------------
+  postgres:
+    image: postgres:15
+    container_name: tradecorp_postgres
+    environment:
+      POSTGRES_DB: tradecorp
+      POSTGRES_USER: tradecorp
+      POSTGRES_PASSWORD: tradecorp
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ----------------- pgAdmin -----------------
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: tradecorp_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
