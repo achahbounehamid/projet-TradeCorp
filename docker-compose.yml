@@ -9,6 +9,7 @@ services:
     volumes:
       - ./data:/home/jovyan/data
       - ./notebooks:/home/jovyan/work
+      - ./src:/home/jovyan/work/src
 
   
 
