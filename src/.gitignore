@@ -1,0 +1,7 @@
+pycache/
+.pytest_cache/
+data/tmp/
+*.pyc
+*.crc
+.env
+notebooks/connexionAzure.ipynbs
