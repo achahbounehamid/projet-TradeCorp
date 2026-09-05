@@ -1,9 +1,10 @@
 from pathlib import Path
 import sys
 
-# Ingestion du PYTHONPATH
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.append(str(PROJECT_ROOT))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
 from src.utils import (
     add_sous_total,
     clean_customers,
@@ -15,7 +16,9 @@ from src.utils import (
 
 
 def build_enriched(dataframes):
-    # 1. Nettoyage individuel via utils.py
+    """Effectue les nettoyages individuels et la grande jointure métier."""
+
+    # 1. Nettoyage 
     df_customers = clean_customers(dataframes["customers"])
     df_orders = clean_orders(dataframes["orders"])
 
@@ -33,22 +36,24 @@ def build_enriched(dataframes):
         df_categories, "category_id", "left"
     )
 
-    # 3. Renommage des colonnes conflictuelles
+    # 3. Renommage des colonnes ambiguës pour éviter les collisions 
     df_customers_renamed = (
         df_customers.withColumnRenamed("company_name", "customer_name")
         .withColumnRenamed("country", "customer_country")
         .withColumnRenamed("city", "customer_city")
+        .withColumnRenamed("phone", "customer_phone")
     )
 
-    df_shippers_renamed = df_shippers.withColumnRenamed(
-        "company_name", "shipper_name"
+    df_shippers_renamed = (
+        df_shippers.withColumnRenamed("company_name", "shipper_name")
+        .withColumnRenamed("phone", "shipper_phone")
     )
 
     df_employees_renamed = df_employees.withColumnRenamed(
         "country", "employee_country"
     ).withColumnRenamed("city", "employee_city")
 
-    # 4. Jointure globale des 7 tables
+    # 4. Jointure globale des tables
     df_enriched = (
         df_order_details.join(df_orders, "order_id", "inner")
         .join(df_customers_renamed, "customer_id", "left")

@@ -1,6 +1,0 @@
-python-dotenv
-azure-storage-blob
-requests
-pytest
-pyspark
-apache-airflow-providers-docker
