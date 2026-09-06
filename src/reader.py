@@ -33,12 +33,12 @@ def load_raw_data(spark):
                     file_path, header=True, inferSchema=True
                 )
             elif ext_lower == ".json":
-                # On force explicitement la clé exchange_rates
-                dataframes["exchange_rates"] = spark.read.option(
+                # Utilise le nom du fichier JSON comme clé dynamiquement
+                dataframes[table_name] = spark.read.option(
                     "multiline", "true"
                 ).json(file_path)
 
-    # 3. si exchange_rates n'était pas sur Azure, recherche en local
+    # 3. Fallback local si exchange_rates n'était pas sur Azure
     if "exchange_rates" not in dataframes:
         local_json = "/home/jovyan/work/data/exchange_rates.json"
         if os.path.exists(local_json):
@@ -50,7 +50,24 @@ def load_raw_data(spark):
 
 
 if __name__ == "__main__":
-    spark = SparkSession.builder.appName("TestReader").getOrCreate()
+    # Définition sécurisée de la SparkSession dans l'environnement Docker
+    spark = SparkSession.builder \
+        .appName("TradeCorp_Reader") \
+        .getOrCreate()
+
     dfs = load_raw_data(spark)
-    print("Clés chargées dans dataframes :", list(dfs.keys()))
+
+    print("\n--- DataFrames chargés ---")
+    for key in dfs.keys():
+        print(f" - {key}")
+
+    # Vérifications des tables de référence Q51
+    if "country_currency" in dfs:
+        print("\n[OK] Table 'country_currency' chargée :")
+        dfs["country_currency"].show(5)
+
+    if "exchange_rates" in dfs:
+        print("\n[OK] Table 'exchange_rates' chargée :")
+        dfs["exchange_rates"].show(5)
+
     spark.stop()
