@@ -1,15 +1,12 @@
 services:
   # ----------------- Spark / JupyterLab -----------------
   spark:
-    image: quay.io/jupyter/pyspark-notebook:latest
+    build: .
     container_name: tradecorp_training_spark
     ports:
       - "8888:8888"
       - "4040:4040"
     volumes:
-      - ./data:/home/jovyan/data
-      - ./notebooks:/home/jovyan/work
-      - ./src:/home/jovyan/work/src
-
+      - .:/home/jovyan/work
   
 
