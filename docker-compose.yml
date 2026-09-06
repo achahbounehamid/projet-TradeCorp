@@ -3,6 +3,8 @@ services:
   spark:
     build: .
     container_name: tradecorp_training_spark
+    env_file:
+      - .env
     ports:
       - "8888:8888"
       - "4040:4040"
