@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
@@ -23,10 +22,17 @@ from src.utils import add_sous_total, clean_customers, clean_orders
 
 @pytest.fixture(scope="session")
 def spark():
-    """Récupère ou crée la SparkSession initialisée par spark-submit."""
-    spark_session = SparkSession.builder.appName("TestTransformers").getOrCreate()
-    yield spark_session
+    """Initialise et nettoie proprement la SparkSession pour les tests."""
+    from pyspark import SparkConf, SparkContext
 
+    conf = SparkConf().setAppName("TestTransformers").setMaster("local[*]")
+    sc = SparkContext.getOrCreate(conf=conf)
+    
+    spark_session = SparkSession.builder.getOrCreate()
+    yield spark_session
+    
+    spark_session.stop()
+    sc.stop()
 
 def test_clean_orders_shipped_date(spark):
     """Vérifie le traitement de shipped_date par clean_orders()."""

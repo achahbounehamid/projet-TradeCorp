@@ -4,7 +4,8 @@ import os
 import sys
 import requests
 from azure.storage.blob import BlobServiceClient
-
+from dotenv import load_dotenv
+load_dotenv("/home/jovyan/.env")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",

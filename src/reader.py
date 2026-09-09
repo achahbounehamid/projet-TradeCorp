@@ -15,7 +15,7 @@ def load_raw_data(spark):
     download_csv(container_name="raw")
 
     dataframes = {}
-    tmp_dir = "/home/jovyan/work/data/tmp"
+    tmp_dir = "/home/jovyan/data/raw"
 
     # 2. Parcours du dossier temporaire
     for root, _, files in os.walk(tmp_dir):
@@ -40,7 +40,7 @@ def load_raw_data(spark):
 
     # 3. Fallback local si exchange_rates n'était pas sur Azure
     if "exchange_rates" not in dataframes:
-        local_json = "/home/jovyan/work/data/exchange_rates.json"
+        local_json = "/home/jovyan/data/exchange_rates.json"
         if os.path.exists(local_json):
             dataframes["exchange_rates"] = spark.read.option(
                 "multiline", "true"

@@ -24,7 +24,8 @@ def download_csv(container_name="raw"):
     blob_service_client = get_azure_blob_client()
     container_client = blob_service_client.get_container_client(container_name)
 
-    local_path = "/home/jovyan/work/data/tmp"
+    # Modification : Utilisation du dossier /tmp/data/raw pour garantir les droits d'écriture
+    local_path = "/tmp/data/raw"
     os.makedirs(local_path, exist_ok=True)
 
     print("Début du téléchargement depuis Azure...")
@@ -39,7 +40,7 @@ def download_csv(container_name="raw"):
         blob_client = container_client.get_blob_client(file_name)
         download_file_path = os.path.join(local_path, file_name)
 
-        # Crée le sous-dossier local  si nécessaire
+        # Crée le sous-dossier local si nécessaire
         os.makedirs(os.path.dirname(download_file_path), exist_ok=True)
 
         with open(download_file_path, "wb") as download_file:

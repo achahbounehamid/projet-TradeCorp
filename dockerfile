@@ -8,4 +8,5 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # 4. Copie du code source dans le conteneur
-COPY . /home/jovyan/work
+COPY . /home/jovyan
+WORKDIR /home/jovyan

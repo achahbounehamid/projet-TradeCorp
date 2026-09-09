@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import shutil
 import sys
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -11,8 +12,13 @@ from src.utils import get_azure_blob_client
 
 
 def write_to_clean(df, container_name="clean"):
-    #"Écrit le DataFrame PySpark au format Parquet puis le téléverse sur Azure le conteneur 'clean'."""
-    local_output_dir = "/home/jovyan/work/data/tmp/clean_output"
+    """Écrit le DataFrame PySpark au format Parquet puis le téléverse sur Azure dans le conteneur 'clean'."""
+    # Dossier temporaire interne au conteneur Docker sans conflit de permissions hôte
+    local_output_dir = "/tmp/data/clean_output"
+
+    # Nettoyage préalable du dossier temporaire local s'il existe déjà
+    if os.path.exists(local_output_dir):
+        shutil.rmtree(local_output_dir)
 
     # 1. Écriture temporaire au format Parquet en local via PySpark
     print("Écriture des données au format Parquet en local...")
