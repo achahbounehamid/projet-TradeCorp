@@ -11,27 +11,28 @@ from src.utils import download_csv
 
 
 def load_raw_data(spark):
-    # 1. Télécharge les fichiers depuis Azure
+    # 1. Téléchargement des données depuis le conteneur 'raw' d'Azure ADLS Gen2
     download_csv(container_name="raw")
 
     dataframes = {}
     tmp_dir = "/home/jovyan/data/raw"
 
-    # 2. Parcours du dossier temporaire
+    # 2. Parcours récursif du répertoire temporaire et lecture PySpark
     for root, _, files in os.walk(tmp_dir):
         for file_name in files:
-            # Ignore les fichiers cachés ou les checkpoints
+            # Filtrage des fichiers temporaires système, des checkpoints Spark et des cachés
             if file_name.startswith(".") or "checkpoint" in file_name:
                 continue
 
             file_path = os.path.join(root, file_name)
             table_name, ext = os.path.splitext(file_name)
             ext_lower = ext.lower()
-
+            # Ingestion des fichiers structurés CSV
             if ext_lower == ".csv":
                 dataframes[table_name] = spark.read.csv(
                     file_path, header=True, inferSchema=True
                 )
+            # Ingestion des fichiers semi-structurés JSON    
             elif ext_lower == ".json":
                 # Utilise le nom du fichier JSON comme clé dynamiquement
                 dataframes[table_name] = spark.read.option(
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     for key in dfs.keys():
         print(f" - {key}")
 
-    # Vérifications des tables de référence Q51
+    # Vérifications des tables de référence de devises et taux de change
     if "country_currency" in dfs:
         print("\n[OK] Table 'country_currency' chargée :")
         dfs["country_currency"].show(5)

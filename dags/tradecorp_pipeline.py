@@ -5,16 +5,17 @@ from docker.types import Mount
 from airflow.providers.docker.operators.docker import DockerOperator
 from dotenv import load_dotenv
 
-# Charge le fichier .env présent dans le dossier racine du projet Airflow
+# Chargement dynamique de l'environnement d'exécution
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
+#Configuration des arguments par défaut du DAG Airflow
 default_args = {
     "owner": "tradecorp",
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
 }
-
+# Configuration des Bind Mounts Docker (Volumes partagés hôte / conteneur)
 mounts_list = [
     Mount(
         source="//c/Users/Utilisateur/Projets/projet-TradeCorp/src",
@@ -32,7 +33,7 @@ mounts_list = [
         type="bind",
     ),
 ]
-
+# Déclaration du DAG Airflow et enchaînement des DockerOperators
 with DAG(
     dag_id="tradecorp_etl_pipeline",
     default_args=default_args,
@@ -41,7 +42,7 @@ with DAG(
     catchup=False,
     tags=["tradecorp", "etl", "spark"],
 ) as dag:
-
+    # Task 1 : Ingestion des taux de change
     fetch_exchange_rates_task = DockerOperator(
         task_id="fetch_exchange_rates",
         image="projet-tradecorp-spark",
@@ -56,7 +57,7 @@ with DAG(
             "AZURE_STORAGE_ACCOUNT_KEY": os.getenv("AZURE_STORAGE_ACCOUNT_KEY"),
         },
     )
-
+    # Task 2 : Chargement et vérification des tables brutes
     reader_task = DockerOperator(
         task_id="reader",
         image="projet-tradecorp-spark",
@@ -71,7 +72,7 @@ with DAG(
             "AZURE_STORAGE_ACCOUNT_KEY": os.getenv("AZURE_STORAGE_ACCOUNT_KEY"),
         },
     )
-
+    # Task 3 : Nettoyage, transformations et jointures enrichies
     transformer_task = DockerOperator(
         task_id="transformer",
         image="projet-tradecorp-spark",
@@ -86,7 +87,7 @@ with DAG(
             "AZURE_STORAGE_ACCOUNT_KEY": os.getenv("AZURE_STORAGE_ACCOUNT_KEY"),
         },
     )
-
+    # Task 4 : Écriture au format Parquet et téléversement vers Azure
     writer_task = DockerOperator(
         task_id="writer",
         image="projet-tradecorp-spark",

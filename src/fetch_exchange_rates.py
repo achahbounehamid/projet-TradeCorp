@@ -5,13 +5,15 @@ import sys
 import requests
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
+# Chargement des variables d'environnement
 load_dotenv("/home/jovyan/.env")
+# Configuration des logs pour qu'ils soient capturés par Airflow
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)]
 )
-
+# Endpoint API pour les taux de change (Devise pivot : USD)
 API_URL = "https://api.exchangerate-api.com/v4/latest/USD"
 
 
@@ -22,14 +24,15 @@ def fetch_and_upload_exchange_rates():
     response.raise_for_status()
     raw_json_data = response.json()
 
-    # 2. Authentification ADLS Gen2 / Blob Storage
+    # 2. Authentification ADLS Gen2 / Blob Storage via les variables d'environnement
     account_url = os.getenv("AZURE_STORAGE_ACCOUNT_URL")
     account_key = os.getenv("AZURE_STORAGE_ACCOUNT_KEY")
-
+    
+    # Vérification de la présence des secrets d'accès
     if not account_url or not account_key:
         raise ValueError("Les variables AZURE_STORAGE_ACCOUNT_URL et AZURE_STORAGE_ACCOUNT_KEY doivent être définies.")
 
-    # Formatage propre de l'URL Blob pour BlobServiceClient  
+    #Conversion du endpoint Data Lake (dfs) en endpoint Blob compatible avec BlobSe  
     blob_url = account_url.replace(".dfs.core.windows.net", ".blob.core.windows.net")
 
     blob_service_client = BlobServiceClient(

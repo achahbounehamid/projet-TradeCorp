@@ -15,11 +15,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-# Import des fonctions à tester 
+# Import des fonctions métier à tester
 from src.enrichement import add_currency_column
 from src.utils import add_sous_total, clean_customers, clean_orders
 
-
+#Initialisation de la SparkSession partagée (Portée Session)
 @pytest.fixture(scope="session")
 def spark():
     """Initialise et nettoie proprement la SparkSession pour les tests."""
@@ -30,10 +30,10 @@ def spark():
     
     spark_session = SparkSession.builder.getOrCreate()
     yield spark_session
-    
+    # Nettoyage à la fin de la session de tests
     spark_session.stop()
     sc.stop()
-
+# Tests Unitaires des Transformations et du Nettoyage
 def test_clean_orders_shipped_date(spark):
     """Vérifie le traitement de shipped_date par clean_orders()."""
     schema = StructType(
@@ -124,9 +124,9 @@ def test_add_currency_column(spark):
     """Vérifie l'enrichissement par la devise et le calcul de sous_total_local."""
     # 1. Jeux de données simulés (sans réseau)
     orders_data = [
-        ("1001", "FRANCE", 100.0),   # Devise EUR -> 100 * 0.85 = 85.0
-        ("1002", "USA", 50.0),       # Devise USD -> 50 * 1.0 = 50.0
-        ("1003", "INCONNU", 30.0),   # Pays non répertorié -> fallback USD (30 * 1.0 = 30.0)
+        ("1001", "FRANCE", 100.0),  
+        ("1002", "USA", 50.0),       
+        ("1003", "INCONNU", 30.0),   
     ]
     orders_df = spark.createDataFrame(
         orders_data, ["order_id", "ship_country", "sous_total"]

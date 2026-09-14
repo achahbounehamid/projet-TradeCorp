@@ -40,12 +40,12 @@ def add_currency_column(orders_df, country_currency_df, exchange_rates_df):
                 F.explode(F.create_map(*map_expr)).alias("currency", "rate")
             )
         else:
-            # Si c'est déjà une MAP
+            # Si c'est 'rates' est déjà une MAP
             rates_clean = exchange_rates_df.select(
                 F.explode(F.col("rates")).alias("currency", "rate")
             )
     else:
-        # Si DataFrame plat de test
+        # Si DataFrame plat de test (cas des mocks de tests unitaires)
         rate_col = (
             "rate"
             if "rate" in exchange_rates_df.columns
@@ -55,7 +55,7 @@ def add_currency_column(orders_df, country_currency_df, exchange_rates_df):
             "currency", F.col(rate_col).alias("rate")
         )
 
-    # 5. Jointure avec les taux de change nettoyés
+    # 5. Jointure avec la table des taux de change normalisée
     enriched_df = enriched_df.join(
         rates_clean,
         on="currency",

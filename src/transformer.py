@@ -18,7 +18,7 @@ from src.utils import (
 def build_enriched(dataframes):
     """Effectue les nettoyages individuels et la grande jointure métier."""
 
-    # 1. Nettoyage 
+    # 1. Nettoyage et transformation individuelle des tables 
     df_customers = clean_customers(dataframes["customers"])
     df_orders = clean_orders(dataframes["orders"])
 

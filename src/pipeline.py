@@ -30,22 +30,22 @@ def run_pipeline():
     spark = None
 
     try:
-        # Initialisation de Spark
+        # Initialisation de SparkSession
         spark = (
             SparkSession.builder.appName("TradeCorp_ETL_Pipeline").getOrCreate()
         )
         spark.sparkContext.setLogLevel("WARN")
 
-        # Step 1: Lecture
+        # Étape 1 : Lecture et Ingestion des données brutes
         logger.info("1. Téléchargement et lecture des données brutes...")
         raw_dfs = load_raw_data(spark)
         logger.info(f"Clés disponibles dans raw_dfs : {list(raw_dfs.keys())}")
 
-        # Step 2: Transformation
+        # Étape 2 : Nettoyage, Normalisation et Jointures Structurées
         logger.info("2. Transformation et nettoyage des données...")
         transformed_df = transform_data(raw_dfs)
 
-        # Step 3: Enrichissement
+        # Étape 3 : Enrichissement Financier (Devises et Taux de Change)
         logger.info("3. Enrichissement devises et taux de change...")
         enriched_df = add_currency_column(
             transformed_df,
@@ -55,7 +55,7 @@ def run_pipeline():
         # Affichage du schéma final dans les logs pour validation
         logger.info("Schéma du DataFrame enrichi :")
         enriched_df.printSchema()
-        # Step 4: Écriture
+        #Étape 4 : Persistance au format Parquet dans Azure ADLS Gen2
         logger.info("4. Sauvegarde en Parquet dans le conteneur 'clean'...")
         write_to_clean(enriched_df)
 

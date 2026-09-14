@@ -49,7 +49,7 @@ def download_csv(container_name="raw"):
         print(f" -> Fichier {file_name} téléchargé avec succès.")
 
 
-# Fonctions de nettoyage individuel
+# Fonctions de nettoyage et transformation PySpark
 
 def clean_customers(df):
     return (
